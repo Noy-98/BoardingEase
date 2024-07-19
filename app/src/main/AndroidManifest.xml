@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.BoardingEase"
+        tools:targetApi="31">
+        <activity
+            android:name=".LandlordAddingPostDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".LandlordReceiptHistoryDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".LandlordPaymentDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".LandlordViewDetailsDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".TenantsPaymentDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".TenantsViewDetailsDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".LandlordProfileDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".TenantProfileDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".ViewMessageTenantsDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".ViewMessageLandlordDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".SendChatLandlordDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".ChatLandlordDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".SendChatTenantsDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".ChatTenantsDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".LandlordHomeDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".TenantHomeDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".ForgotPassword"
+            android:exported="false" />
+        <activity
+            android:name=".Signup"
+            android:exported="false" />
+        <activity
+            android:name=".Login"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

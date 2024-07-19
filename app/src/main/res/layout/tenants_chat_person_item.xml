@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardElevation="8dp"
+    app:cardCornerRadius="10dp"
+    android:layout_margin="20dp"
+    app:cardBackgroundColor="#F8F8F8">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="10dp"
+        android:layout_gravity="center"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Landlord Lastname"
+            android:textColor="#00BE63"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/viewDetails_bttn"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:text="View Message"
+            android:textSize="12sp"
+            android:backgroundTint="#00BB63"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="10dp"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/delete_bttn"
+            android:layout_width="80dp"
+            android:layout_height="50dp"
+            android:text="Delete"
+            android:textSize="12sp"
+            android:backgroundTint="#BB0000"
+            android:textAllCaps="false"
+            android:textColor="@color/white"/>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

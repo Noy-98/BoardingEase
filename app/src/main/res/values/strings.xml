@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">BoardingEase</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="no_account">No Account?</string>
+    <string name="enter_your_details">Enter your details</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="mobile_number">Mobile Number</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="login_here">Login here</string>
+    <string name="enter_your_email">Enter your email</string>
+    <string name="verify">Verify</string>
+    <string name="signup">Signup</string>
+    <string name="signup_here">Signup Here</string>
+    <string name="login">Login</string>
+    <string name="landlord">Landlord</string>
+    <string name="tenant">Tenant</string>
+    <string name="home">Home</string>
+    <string name="chat">Chat</string>
+    <string name="profile">Profile</string>
+    <string name="logout">Logout</string>
+    <string name="welcome">Welcome!,</string>
+    <string name="new_password">New Password</string>
+    <string name="payment">Payment</string>
+    <string name="receipt">Receipt</string>
+</resources>

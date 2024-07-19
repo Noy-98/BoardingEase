@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "369907890618",
+    "firebase_url": "https://boardingease-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "boardingease-main",
+    "storage_bucket": "boardingease-main.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:369907890618:android:7659e6f926346e340e8583",
+        "android_client_info": {
+          "package_name": "com.example.boardingease"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMrZNqf9dIvCS10oWj-KDdT72kHTKsIeM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
