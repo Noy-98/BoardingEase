@@ -1,12 +1,34 @@
 package com.example.boardingease
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.view.MenuItem
+import android.view.View
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.bumptech.glide.Glide
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.imageview.ShapeableImageView
+import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.storage.UploadTask
 
 class LandlordProfileDashboard : AppCompatActivity() {
+
+    private lateinit var databaseReference: FirebaseDatabase
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -15,6 +37,127 @@ class LandlordProfileDashboard : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_nav)
+        bottomNavigationView.selectedItemId = R.id.profile
+        bottomNavigationView.setOnItemSelectedListener { item: MenuItem ->
+            if (item.itemId == R.id.home) {
+                startActivity(Intent(applicationContext, LandlordHomeDashboard::class.java))
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                finish()
+                return@setOnItemSelectedListener true
+            } else if (item.itemId == R.id.chat) {
+                startActivity(Intent(applicationContext, ChatLandlordDashboard::class.java))
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                finish()
+                return@setOnItemSelectedListener true
+            } else if (item.itemId == R.id.gcash) {
+                startActivity(Intent(applicationContext, LandlordPaymentDashboard::class.java))
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                finish()
+                return@setOnItemSelectedListener true
+            } else if (item.itemId == R.id.profile) {
+                return@setOnItemSelectedListener true
+            } else if (item.itemId == R.id.logout) {
+                FirebaseAuth.getInstance().signOut()
+                val intent = Intent(this, Login::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                return@setOnItemSelectedListener true
+            }
+            false
+        }
+
+        databaseReference = FirebaseDatabase.getInstance()
+        auth = FirebaseAuth.getInstance()
+
+        val editProfileButton = findViewById<AppCompatButton>(R.id.change_profile_bttn)
+        editProfileButton.setOnClickListener {
+            updateProfile()
+        }
+
+        loadUsersProfile()
+    }
+
+    private fun loadUsersProfile() {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null){
+            val uid = currentUser.uid
+            val usersReference = FirebaseDatabase.getInstance().getReference("UsersTbl/$uid")
+
+            usersReference.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        val users = snapshot.getValue(UsersStructureDB::class.java)
+                        if (users != null) {
+                            // Set the text views with the doctor's information
+                            findViewById<TextView>(R.id.first_name).text = users.first_name
+                            findViewById<TextView>(R.id.last_name).text = users.last_name
+                            findViewById<TextView>(R.id.mobile_number).text = users.mobile_num
+                            findViewById<TextView>(R.id.email).text = users.email
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(this@LandlordProfileDashboard, "Failed to load profile", Toast.LENGTH_SHORT).show()
+                }
+
+            })
+        }
+    }
+
+    private fun updateProfile() {
+        val firstName = findViewById<TextInputEditText>(R.id.first_name).text.toString().trim()
+        val lastName = findViewById<TextInputEditText>(R.id.last_name).text.toString().trim()
+        val mobileNum = findViewById<TextInputEditText>(R.id.mobile_number).text.toString().trim()
+        val password = findViewById<TextInputEditText>(R.id.password).text.toString().trim()
+        val confirmPassword = findViewById<TextInputEditText>(R.id.confirm_password).text.toString().trim()
+
+
+        if (firstName.isEmpty() || lastName.isEmpty() || mobileNum.isEmpty()  || password.isEmpty() || confirmPassword.isEmpty()) {
+            Toast.makeText(this, "All fields are required to fill in", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            val uid = currentUser.uid
+            val usersReference = databaseReference.getReference("UsersTbl/$uid")
+
+            // Update other profile information
+            if (firstName.isNotEmpty()) {
+                usersReference.child("first_name").setValue(firstName)
+            }
+            if (lastName.isNotEmpty()) {
+                usersReference.child("last_name").setValue(lastName)
+            }
+            if (mobileNum.isNotEmpty()) {
+                usersReference.child("mobile_num").setValue(mobileNum)
+            }
+
+            // Update password
+            if (password.isNotEmpty()) {
+                if (password.length >= 6) {
+                    if (password == confirmPassword) {
+                        currentUser.updatePassword(password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(this, "Failed to update password", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                    } else {
+                        Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

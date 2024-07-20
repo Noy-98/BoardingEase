@@ -86,7 +86,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"/>
 
             <ImageView
-                android:id="@+id/add_patient_bttn"
+                android:id="@+id/add_post_bttn"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_alignParentEnd="true"

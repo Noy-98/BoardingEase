@@ -113,6 +113,7 @@
                 android:layout_marginEnd="20dp"/>
 
             <RadioGroup
+                android:id="@+id/radio_group"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
@@ -122,10 +123,12 @@
                 android:background="#B9ECD4">
 
                 <RadioButton
+                    android:id="@+id/landlord"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/landlord"/>
                 <RadioButton
+                    android:id="@+id/tenant"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/tenant"/>
