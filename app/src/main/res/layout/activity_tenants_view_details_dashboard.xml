@@ -128,6 +128,7 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/room_no"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
@@ -137,6 +138,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/number_of_borders"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
@@ -146,6 +148,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/status"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
@@ -155,6 +158,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/price"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
@@ -164,6 +168,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/contact_no"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
@@ -173,6 +178,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/address"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"

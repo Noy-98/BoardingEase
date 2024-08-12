@@ -45,6 +45,10 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
     private lateinit var currentUsersId: String
     private lateinit var currentBId: String
     private lateinit var ProgressBar: ProgressBar
+    private lateinit var selectedImageUri: Uri
+    // New variables for permit image
+    private val PICK_PERMIT_REQUEST = 2
+    private lateinit var selectedPermitUri: Uri
 
     private lateinit var lastNameEditText: TextInputEditText
     private lateinit var roomNoEditText: TextInputEditText
@@ -53,6 +57,7 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
     private lateinit var priceEditText: TextInputEditText
     private lateinit var contactNoEditText: TextInputEditText
     private lateinit var addressEditText: TextInputEditText
+    private lateinit var rulesEditText: TextInputEditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -122,6 +127,7 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
         priceEditText = findViewById(R.id.price)
         contactNoEditText = findViewById(R.id.contact_no)
         addressEditText = findViewById(R.id.address)
+        rulesEditText = findViewById(R.id.rules_and_regulations)
 
         val deleteButton = findViewById<AppCompatButton>(R.id.delete_bttn)
         deleteButton.setOnClickListener {
@@ -133,12 +139,24 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
             openImagePicker()
         }
 
+        val upload_permit_bttn = findViewById<AppCompatButton>(R.id.permit_bttn)
+        upload_permit_bttn.setOnClickListener {
+            openPermitImageChooser()
+        }
+
         val editProfileButton = findViewById<AppCompatButton>(R.id.edit)
         editProfileButton.setOnClickListener {
             updateProfile()
         }
 
         populateFields()
+    }
+
+    private fun openPermitImageChooser() {
+        val intent = Intent()
+        intent.type = "image/*"
+        intent.action = Intent.ACTION_GET_CONTENT
+        startActivityForResult(intent, PICK_PERMIT_REQUEST)
     }
 
     private fun deleteBoardingData() {
@@ -176,6 +194,7 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
         priceEditText.setText(boardingData.price)
         contactNoEditText.setText(boardingData.contact_number)
         addressEditText.setText(boardingData.address)
+        rulesEditText.setText(boardingData.rules_and_regulations)
 
         boardingData.unitPictureUrl?.let {
             val boardingImageView = findViewById<ImageView>(R.id.boarding_pic)
@@ -183,6 +202,12 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
                 .load(it)
                 .into(boardingImageView)
         }
+        boardingData.permitImageUrl?.let {
+            val permitImageView = findViewById<ImageView>(R.id.permit_pic)
+            Glide.with(this)
+                .load(it)
+                .into(permitImageView)
+            }
     }
 
     private fun updateProfile() {
@@ -193,11 +218,12 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
         val price = priceEditText.text.toString().trim()
         val contactNo = contactNoEditText.text.toString().trim()
         val address = addressEditText.text.toString().trim()
+        val rules = rulesEditText.text.toString().trim()
 
         ProgressBar.visibility = View.VISIBLE
 
         if (lastName.isEmpty() || roomNo.isEmpty() || numBorders.isEmpty() ||
-            status.isEmpty() || price.isEmpty() || contactNo.isEmpty() || address.isEmpty()
+            status.isEmpty() || price.isEmpty() || contactNo.isEmpty() || address.isEmpty() || rules.isEmpty()
         ) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
             ProgressBar.visibility = View.GONE
@@ -214,6 +240,7 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
             price = price,
             room_number = roomNo,
             status = status,
+            rules_and_regulations = rules,
             unitPictureUrl = boardingData.unitPictureUrl // Retain original image URL if not being edited
         )
 
@@ -288,13 +315,19 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.data != null) {
-            imageUri = data.data!!
-            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, imageUri)
+            selectedImageUri = data.data!!
+            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedImageUri)
 
-            // Display the selected image in the ImageView
             val imageView = findViewById<ImageView>(R.id.boarding_pic)
             imageView.setImageBitmap(bitmap)
             imageView.visibility = View.VISIBLE
+        } else if (requestCode == PICK_PERMIT_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.data != null) {
+            selectedPermitUri = data.data!!
+            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedPermitUri)
+
+            val permitImageView = findViewById<ImageView>(R.id.permit_pic)
+            permitImageView.setImageBitmap(bitmap)
+            permitImageView.visibility = View.VISIBLE
         }
     }
 }

@@ -37,6 +37,9 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
     private val PICK_IMAGE_REQUEST = 1
     private lateinit var selectedImageUri: Uri
     private lateinit var storageReference: StorageReference
+    // New variables for permit image
+    private val PICK_PERMIT_REQUEST = 2
+    private lateinit var selectedPermitUri: Uri
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,14 +102,20 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
         val pricee = findViewById<TextInputEditText>(R.id.price)
         val contactNum = findViewById<TextInputEditText>(R.id.contact_no)
         val add = findViewById<TextInputEditText>(R.id.address)
+        val rules = findViewById<TextInputEditText>(R.id.rules_and_regulations)
         val submitButton = findViewById<AppCompatButton>(R.id.submit_bttn)
         val Add_Picture = findViewById<AppCompatButton>(R.id.upload_bttn)
+        val upload_permit_bttn = findViewById<AppCompatButton>(R.id.permit_bttn)
         ProgressBar = findViewById(R.id.progressBar)
 
         storageReference = FirebaseStorage.getInstance().reference
 
         Add_Picture.setOnClickListener {
             openImageChooser()
+        }
+
+        upload_permit_bttn.setOnClickListener {
+            openPermitImageChooser()
         }
 
         submitButton.setOnClickListener {
@@ -117,10 +126,11 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
             val price_tag = pricee.text.toString().trim()
             val contact_Num = contactNum.text.toString().trim()
             val adddress = add.text.toString().trim()
+            val rules_reg = rules.text.toString().trim()
 
             ProgressBar.visibility = View.VISIBLE
 
-            if (last_name.isEmpty() || room_Num.isEmpty() || num_Borders.isEmpty() || status.isEmpty() || price_tag.isEmpty() || contact_Num.isEmpty() || adddress.isEmpty()) {
+            if (last_name.isEmpty() || room_Num.isEmpty() || num_Borders.isEmpty() || status.isEmpty() || price_tag.isEmpty() || contact_Num.isEmpty() || adddress.isEmpty() || rules_reg.isEmpty()) {
                 if (last_name.isEmpty()) {
                     lastname.error = "Please enter your last name"
                 }
@@ -142,6 +152,9 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
                 if (adddress.isEmpty()) {
                     add.error = "Please enter your address"
                 }
+                if (rules_reg.isEmpty()) {
+                    rules.error = "Please enter your rules and regulations"
+                }
                 Toast.makeText(this, "All fields are Required!", Toast.LENGTH_SHORT).show()
                 ProgressBar.visibility = View.GONE
             } else {
@@ -154,11 +167,19 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
                     status = status,
                     price = price_tag,
                     contact_number = contact_Num,
-                    address = adddress
+                    address = adddress,
+                    rules_and_regulations = rules_reg
                 )
                 uploadImage(boardingData)
             }
         }
+    }
+
+    private fun openPermitImageChooser() {
+        val intent = Intent()
+        intent.type = "image/*"
+        intent.action = Intent.ACTION_GET_CONTENT
+        startActivityForResult(intent, PICK_PERMIT_REQUEST)
     }
 
     private fun uploadImage(boardingData: BoardingDataStructureDB) {
@@ -182,7 +203,8 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
         }.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val downloadUrl = task.result.toString()
-                saveBoardingData(boardingData, downloadUrl)
+                boardingData.unitPictureUrl = downloadUrl
+                uploadPermitImage(boardingData)
             } else {
                 Toast.makeText(this, "Failed to upload image", Toast.LENGTH_SHORT).show()
                 ProgressBar.visibility = View.GONE
@@ -190,8 +212,34 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
         }
     }
 
-    private fun saveBoardingData(boardingData: BoardingDataStructureDB, imageUrl: String) {
-        boardingData.unitPictureUrl = imageUrl
+    private fun uploadPermitImage(boardingData: BoardingDataStructureDB) {
+        val permitImageRef = storageReference.child("permits/${System.currentTimeMillis()}.jpg")
+        val permitBitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedPermitUri)
+        val baos = ByteArrayOutputStream()
+        permitBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        val permitData = baos.toByteArray()
+
+        val uploadTask = permitImageRef.putBytes(permitData)
+        uploadTask.continueWithTask { task ->
+            if (!task.isSuccessful) {
+                task.exception?.let {
+                    throw it
+                }
+            }
+            permitImageRef.downloadUrl
+        }.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val permitDownloadUrl = task.result.toString()
+                boardingData.permitImageUrl = permitDownloadUrl
+                saveBoardingData(boardingData)
+            } else {
+                Toast.makeText(this, "Failed to upload permit image", Toast.LENGTH_SHORT).show()
+                ProgressBar.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun saveBoardingData(boardingData: BoardingDataStructureDB) {
 
         val updates = hashMapOf<String, Any>(
             "/UsersTbl/$currentUsersId/BoardingsTbl/$bid" to boardingData,
@@ -222,10 +270,16 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
             selectedImageUri = data.data!!
             val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedImageUri)
 
-            // Display the selected image in the ImageView
             val imageView = findViewById<ImageView>(R.id.boarding_pic)
             imageView.setImageBitmap(bitmap)
             imageView.visibility = View.VISIBLE
+        } else if (requestCode == PICK_PERMIT_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.data != null) {
+            selectedPermitUri = data.data!!
+            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedPermitUri)
+
+            val permitImageView = findViewById<ImageView>(R.id.permit_pic)
+            permitImageView.setImageBitmap(bitmap)
+            permitImageView.visibility = View.VISIBLE
         }
     }
 }
