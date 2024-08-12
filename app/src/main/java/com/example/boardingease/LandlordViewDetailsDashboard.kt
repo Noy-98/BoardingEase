@@ -2,11 +2,16 @@ package com.example.boardingease
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.MenuItem
+import android.view.View
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,6 +32,7 @@ import com.google.firebase.database.MutableData
 import com.google.firebase.database.Transaction
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import java.io.ByteArrayOutputStream
 
 class LandlordViewDetailsDashboard : AppCompatActivity() {
 
@@ -35,6 +41,10 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var databaseReference: DatabaseReference
     private lateinit var boardingData: BoardingDataStructureDB
+    private val PICK_IMAGE_REQUEST = 1
+    private lateinit var currentUsersId: String
+    private lateinit var currentBId: String
+    private lateinit var ProgressBar: ProgressBar
 
     private lateinit var lastNameEditText: TextInputEditText
     private lateinit var roomNoEditText: TextInputEditText
@@ -43,19 +53,6 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
     private lateinit var priceEditText: TextInputEditText
     private lateinit var contactNoEditText: TextInputEditText
     private lateinit var addressEditText: TextInputEditText
-
-    private val getContent =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                result.data?.data?.let { uri ->
-                    imageUri = uri
-                    val boardingImageView = findViewById<ImageView>(R.id.boarding_pic)
-                    Glide.with(this)
-                        .load(imageUri)
-                        .into(boardingImageView)
-                }
-            }
-        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,37 +67,50 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_nav)
         bottomNavigationView.selectedItemId = R.id.home
         bottomNavigationView.setOnItemSelectedListener { item: MenuItem ->
-            if (item.itemId == R.id.home) {
-                startActivity(Intent(applicationContext, LandlordHomeDashboard::class.java))
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                finish()
-                return@setOnItemSelectedListener true
-            } else if (item.itemId == R.id.chat) {
-                startActivity(Intent(applicationContext, ChatLandlordDashboard::class.java))
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                finish()
-                return@setOnItemSelectedListener true
-            } else if (item.itemId == R.id.gcash) {
-                startActivity(Intent(applicationContext, LandlordPaymentDashboard::class.java))
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                finish()
-                return@setOnItemSelectedListener true
-            } else if (item.itemId == R.id.profile) {
-                startActivity(Intent(applicationContext, LandlordProfileDashboard::class.java))
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                finish()
-                return@setOnItemSelectedListener true
-            } else if (item.itemId == R.id.logout) {
-                FirebaseAuth.getInstance().signOut()
-                val intent = Intent(this, Login::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                return@setOnItemSelectedListener true
+            when (item.itemId) {
+                R.id.home -> {
+                    startActivity(Intent(applicationContext, LandlordHomeDashboard::class.java))
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                    finish()
+                    true
+                }
+                R.id.chat -> {
+                    startActivity(Intent(applicationContext, ChatLandlordDashboard::class.java))
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                    finish()
+                    true
+                }
+                R.id.gcash -> {
+                    startActivity(Intent(applicationContext, LandlordPaymentDashboard::class.java))
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                    finish()
+                    true
+                }
+                R.id.profile -> {
+                    startActivity(Intent(applicationContext, LandlordProfileDashboard::class.java))
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                    finish()
+                    true
+                }
+                R.id.logout -> {
+                    FirebaseAuth.getInstance().signOut()
+                    val intent = Intent(this, Login::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    true
+                }
+                else -> false
             }
-            false
         }
+        ProgressBar = findViewById(R.id.progressBar)
         auth = FirebaseAuth.getInstance()
         databaseReference = FirebaseDatabase.getInstance().reference
+        storageReference = FirebaseStorage.getInstance().reference
+
+        val currentUser = auth.currentUser
+        currentUsersId = currentUser?.uid ?: ""
+
+        currentBId = intent.getStringExtra("b_id") ?: ""
 
         boardingData = intent.getSerializableExtra("boardingData") as BoardingDataStructureDB
 
@@ -132,11 +142,9 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
     }
 
     private fun deleteBoardingData() {
-        val userId = auth.currentUser?.uid ?: return
-        val currentBId = intent.getStringExtra("b_id") ?: return
 
         // References to both paths
-        val userBoardingRef = FirebaseDatabase.getInstance().getReference("UsersTbl").child(userId).child("BoardingsTbl").child(currentBId)
+        val userBoardingRef = FirebaseDatabase.getInstance().getReference("UsersTbl").child(currentUsersId).child("BoardingsTbl").child(currentBId)
         val globalBoardingRef = FirebaseDatabase.getInstance().getReference("BoardingsTbl").child(currentBId)
 
         // Create deletion tasks
@@ -155,6 +163,7 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
                 Toast.makeText(this, "Failed to delete boarding data: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                 Log.e("DeleteBoardingData", "Error deleting data", task.exception)
             }
+            ProgressBar.visibility = View.GONE
         }
     }
 
@@ -177,8 +186,6 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
     }
 
     private fun updateProfile() {
-        val userId = auth.currentUser?.uid ?: return
-
         val lastName = lastNameEditText.text.toString().trim()
         val roomNo = roomNoEditText.text.toString().trim()
         val numBorders = numBordersEditText.text.toString().trim()
@@ -187,15 +194,15 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
         val contactNo = contactNoEditText.text.toString().trim()
         val address = addressEditText.text.toString().trim()
 
+        ProgressBar.visibility = View.VISIBLE
+
         if (lastName.isEmpty() || roomNo.isEmpty() || numBorders.isEmpty() ||
             status.isEmpty() || price.isEmpty() || contactNo.isEmpty() || address.isEmpty()
         ) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+            ProgressBar.visibility = View.GONE
             return
         }
-
-        // Ensure current b_id is being used
-        val currentBId = boardingData.b_id
 
         // Create a new instance of BoardingDataStructureDB with updated data
         val updatedBoardingData = BoardingDataStructureDB(
@@ -210,9 +217,51 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
             unitPictureUrl = boardingData.unitPictureUrl // Retain original image URL if not being edited
         )
 
+        // Check if a new image was selected
+        val imageView = findViewById<ImageView>(R.id.boarding_pic)
+        if (imageView.drawable != null) {
+            uploadImage(updatedBoardingData)
+        } else {
+            updatedBoardingData.unitPictureUrl?.let { saveBoardingData(updatedBoardingData, it) }
+        }
+    }
+
+    private fun uploadImage(updatedBoardingData: BoardingDataStructureDB) {
+        val imageRef = storageReference.child("images/${System.currentTimeMillis()}.jpg")
+        val imageView = findViewById<ImageView>(R.id.boarding_pic)
+        imageView.isDrawingCacheEnabled = true
+        imageView.buildDrawingCache()
+        val bitmap = (imageView.drawable as BitmapDrawable).bitmap
+        val baos = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        val imageData = baos.toByteArray()
+
+        val uploadTask = imageRef.putBytes(imageData)
+        uploadTask.continueWithTask { task ->
+            if (!task.isSuccessful) {
+                task.exception?.let {
+                    throw it
+                }
+            }
+            imageRef.downloadUrl
+        }.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val downloadUrl = task.result.toString()
+                saveBoardingData(updatedBoardingData.copy(unitPictureUrl = downloadUrl), downloadUrl)
+            } else {
+                Toast.makeText(this, "Failed to upload image", Toast.LENGTH_SHORT).show()
+                ProgressBar.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun saveBoardingData(
+        updatedBoardingData: BoardingDataStructureDB,
+        imageUrl: String
+    ) {
         // Update the data under both UsersTbl and BoardingsTbl
         val updates = hashMapOf<String, Any>(
-            "/UsersTbl/$userId/BoardingsTbl/$currentBId" to updatedBoardingData,
+            "/UsersTbl/$currentUsersId/BoardingsTbl/$currentBId" to updatedBoardingData,
             "/BoardingsTbl/$currentBId" to updatedBoardingData
         )
 
@@ -220,17 +269,32 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
             if (task.isSuccessful) {
                 val intent = Intent(this, LandlordHomeDashboard::class.java)
                 startActivity(intent)
-                Toast.makeText(this, "Data updated successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Boarding Post successfully Changed!", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, "Failed to update data: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
-                Log.e("UpdateProfile", "Error updating data", task.exception)
+                Log.e("UpdateProfile", "Error updating Boarding Post", task.exception)
             }
+            ProgressBar.visibility = View.GONE
         }
     }
 
     private fun openImagePicker() {
-        val intent = Intent(Intent.ACTION_PICK)
+        val intent = Intent()
         intent.type = "image/*"
-        getContent.launch(intent)
+        intent.action = Intent.ACTION_GET_CONTENT
+        startActivityForResult(intent, PICK_IMAGE_REQUEST)
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.data != null) {
+            imageUri = data.data!!
+            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, imageUri)
+
+            // Display the selected image in the ImageView
+            val imageView = findViewById<ImageView>(R.id.boarding_pic)
+            imageView.setImageBitmap(bitmap)
+            imageView.visibility = View.VISIBLE
+        }
     }
 }

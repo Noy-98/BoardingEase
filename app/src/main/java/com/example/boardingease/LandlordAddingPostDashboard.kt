@@ -200,10 +200,10 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
 
         database.reference.updateChildren(updates).addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                Toast.makeText(this, "Data saved successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Boarding Post Upload successfully", Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this, LandlordHomeDashboard::class.java))
             } else {
-                Toast.makeText(this, "Failed to save data", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Failed to Upload Boarding Post", Toast.LENGTH_SHORT).show()
             }
             ProgressBar.visibility = View.GONE
         }
