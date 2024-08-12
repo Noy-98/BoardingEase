@@ -1,8 +1,11 @@
 package com.example.boardingease
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
+import android.widget.CheckBox
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -24,6 +27,8 @@ class Login : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
+    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var editor: SharedPreferences.Editor
     private val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,12 +46,26 @@ class Login : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
 
+        // Initialize SharedPreferences
+        sharedPreferences = getSharedPreferences("loginPrefs", Context.MODE_PRIVATE)
+        editor = sharedPreferences.edit()
+
         val sign_up_bttn = findViewById<TextView>(R.id.sign_up_bttn)
         val forgot_pass = findViewById<TextView>(R.id.forgot_pass)
         val login : AppCompatButton = findViewById(R.id.login_bttn)
         val Email : TextInputEditText = findViewById(R.id.email)
         val Password : TextInputEditText = findViewById(R.id.pass)
+        val rememberMe : CheckBox = findViewById(R.id.remember_me)
         val ProgressBar : ProgressBar = findViewById(R.id.signInProgressBar)
+
+        // Load saved email and password
+        val savedEmail = sharedPreferences.getString("email", "")
+        val savedPassword = sharedPreferences.getString("password", "")
+        val isRemembered = sharedPreferences.getBoolean("rememberMe", false)
+
+        Email.setText(savedEmail)
+        Password.setText(savedPassword)
+        rememberMe.isChecked = isRemembered
 
         login.setOnClickListener {
             ProgressBar.visibility = View.VISIBLE
@@ -67,16 +86,23 @@ class Login : AppCompatActivity() {
                 Email.error = "Please Enter a Valid Email Address!"
                 Toast.makeText(this,"Enter valid email address", Toast.LENGTH_SHORT).show()
                 ProgressBar.visibility = View.GONE
-            } else if (pass.length < 6) {
-                Password.error = "Password must be at least 6 characters long!"
-                Toast.makeText(this,"Password must be at least 6 characters long!", Toast.LENGTH_SHORT).show()
-                ProgressBar.visibility = View.GONE
             } else {
                 auth.signInWithEmailAndPassword(email, pass).addOnCompleteListener {loginTask ->
                     if (loginTask.isSuccessful){
                         val user = auth.currentUser
                         if (user != null) {
                             if(user.isEmailVerified){
+                                // Save email and password if "Remember Me" is checked
+                                if (rememberMe.isChecked) {
+                                    editor.putString("email", email)
+                                    editor.putString("password", pass)
+                                    editor.putBoolean("rememberMe", true)
+                                    editor.apply()
+                                } else {
+                                    editor.clear()
+                                    editor.apply()
+                                }
+                                // Retrieve user type from the database
                                 database.child("UsersTbl").child(user.uid).child("user_type").addListenerForSingleValueEvent(object :
                                     ValueEventListener {
                                     override fun onDataChange(dataSnapshot: DataSnapshot) {

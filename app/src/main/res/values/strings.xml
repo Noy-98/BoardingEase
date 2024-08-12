@@ -26,4 +26,7 @@
     <string name="new_password">New Password</string>
     <string name="payment">Payment</string>
     <string name="receipt">Receipt</string>
+    <string name="gender">Gender</string>
+    <string name="remember_me">Remember me</string>
+    <string name="no_post_added">No post Added!</string>
 </resources>

@@ -17,6 +17,7 @@ import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -28,6 +29,8 @@ class LandlordProfileDashboard : AppCompatActivity() {
 
     private lateinit var databaseReference: FirebaseDatabase
     private lateinit var auth: FirebaseAuth
+    private val passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@\$!%*?&_-])[A-Za-z\\d@\$!%*?&_-]{6,}$"
+    private val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,6 +97,7 @@ class LandlordProfileDashboard : AppCompatActivity() {
                             // Set the text views with the doctor's information
                             findViewById<TextView>(R.id.first_name).text = users.first_name
                             findViewById<TextView>(R.id.last_name).text = users.last_name
+                            findViewById<TextView>(R.id.gender).text = users.gender
                             findViewById<TextView>(R.id.mobile_number).text = users.mobile_num
                             findViewById<TextView>(R.id.email).text = users.email
                         }
@@ -111,13 +115,24 @@ class LandlordProfileDashboard : AppCompatActivity() {
     private fun updateProfile() {
         val firstName = findViewById<TextInputEditText>(R.id.first_name).text.toString().trim()
         val lastName = findViewById<TextInputEditText>(R.id.last_name).text.toString().trim()
+        val gen = findViewById<TextInputEditText>(R.id.gender).text.toString().trim()
         val mobileNum = findViewById<TextInputEditText>(R.id.mobile_number).text.toString().trim()
+        val em = findViewById<TextInputEditText>(R.id.email).text.toString().trim()
         val password = findViewById<TextInputEditText>(R.id.password).text.toString().trim()
         val confirmPassword = findViewById<TextInputEditText>(R.id.confirm_password).text.toString().trim()
 
-
-        if (firstName.isEmpty() || lastName.isEmpty() || mobileNum.isEmpty()  || password.isEmpty() || confirmPassword.isEmpty()) {
+        if (firstName.isEmpty() || lastName.isEmpty() || gen.isEmpty() || mobileNum.isEmpty() || em.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             Toast.makeText(this, "All fields are required to fill in", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!em.matches(emailPattern.toRegex())) {
+            Toast.makeText(this, "Invalid Email Address!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!password.matches(passwordPattern.toRegex())) {
+            Toast.makeText(this, "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character!", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -126,38 +141,43 @@ class LandlordProfileDashboard : AppCompatActivity() {
             val uid = currentUser.uid
             val usersReference = databaseReference.getReference("UsersTbl/$uid")
 
-            // Update other profile information
-            if (firstName.isNotEmpty()) {
-                usersReference.child("first_name").setValue(firstName)
-            }
-            if (lastName.isNotEmpty()) {
-                usersReference.child("last_name").setValue(lastName)
-            }
-            if (mobileNum.isNotEmpty()) {
-                usersReference.child("mobile_num").setValue(mobileNum)
-            }
+            usersReference.child("first_name").setValue(firstName)
+            usersReference.child("last_name").setValue(lastName)
+            usersReference.child("gender").setValue(gen)
+            usersReference.child("mobile_num").setValue(mobileNum)
 
-            // Update password
-            if (password.isNotEmpty()) {
-                if (password.length >= 6) {
-                    if (password == confirmPassword) {
-                        currentUser.updatePassword(password)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+            // Re-authenticate user before updating email
+            val credential = EmailAuthProvider.getCredential(currentUser.email!!, password)
+            currentUser.reauthenticate(credential)
+                .addOnCompleteListener { reauthTask ->
+                    if (reauthTask.isSuccessful) {
+                        currentUser.updateEmail(em)
+                            .addOnCompleteListener { updateEmailTask ->
+                                if (updateEmailTask.isSuccessful) {
+                                    usersReference.child("email").setValue(em)
+                                    Toast.makeText(this, "Email updated successfully", Toast.LENGTH_SHORT).show()
+
+                                    if (password == confirmPassword) {
+                                        currentUser.updatePassword(password)
+                                            .addOnCompleteListener { updatePasswordTask ->
+                                                if (updatePasswordTask.isSuccessful) {
+                                                    usersReference.child("password").setValue(password)
+                                                    Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                                                } else {
+                                                    Toast.makeText(this, "Failed to update password: ${updatePasswordTask.exception?.message}", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
+                                    } else {
+                                        Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
+                                    }
                                 } else {
-                                    Toast.makeText(this, "Failed to update password", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this, "Failed to update email: ${updateEmailTask.exception?.message}", Toast.LENGTH_SHORT).show()
                                 }
                             }
                     } else {
-                        Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Re-authentication failed: ${reauthTask.exception?.message}", Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
-            }
         }
     }
 }

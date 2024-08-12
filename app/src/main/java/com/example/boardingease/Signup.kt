@@ -25,6 +25,7 @@ class Signup : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var database: FirebaseDatabase
     private val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
+    private val passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@\$!%*?&_-])[A-Za-z\\d@\$!%*?&_-]{6,}$"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +53,9 @@ class Signup : AppCompatActivity() {
         val signup_bttn = findViewById<AppCompatButton>(R.id.signup_bttn)
         val signUpProgressBar : ProgressBar = findViewById(R.id.signUpProgressBar)
         val radioGroup = findViewById<RadioGroup>(R.id.radio_group)
+
+        // Set default value for gender selection
+        val defaultGender = "Gender"
 
         signup_bttn.setOnClickListener {
             val first_name = firstname.text.toString()
@@ -92,9 +96,9 @@ class Signup : AppCompatActivity() {
                 em.error = "Invalid Email Address!"
                 Toast.makeText(this,"Invalid Email Address!", Toast.LENGTH_SHORT).show()
                 signUpProgressBar.visibility = View.GONE
-            } else if (password.length < 6){
-                pass.error = "Password must be at least 6 characters long!"
-                Toast.makeText(this,"Password must be at least 6 characters long!", Toast.LENGTH_SHORT).show()
+            } else if (!password.matches(passwordPattern.toRegex())) {
+                pass.error = "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character and have a 6 characters long!"
+                Toast.makeText(this, "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character and have a 6 characters long!", Toast.LENGTH_LONG).show()
                 signUpProgressBar.visibility = View.GONE
             } else if (password != confirm_password){
                 confirmpass.error = "Password does not match!"
@@ -115,7 +119,7 @@ class Signup : AppCompatActivity() {
                             }
 
                         val databaseRef = database.reference.child("UsersTbl").child(auth.currentUser!!.uid)
-                        val users: UsersStructureDB = UsersStructureDB(email, first_name, last_name, mobile_number, password, selectedUserType, auth.currentUser!!.uid)
+                        val users: UsersStructureDB = UsersStructureDB(email, first_name, last_name, defaultGender, mobile_number, password, selectedUserType, auth.currentUser!!.uid)
 
                         databaseRef.setValue(users).addOnCompleteListener { dbTask ->
                             if (dbTask.isSuccessful) {

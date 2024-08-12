@@ -81,17 +81,36 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp">
+
+        <CheckBox
+            android:id="@+id/remember_me"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/remember_me"
+            android:layout_marginEnd="30dp"
+            android:textColor="@color/black"
+            android:buttonTint="#00BD63"
+            android:textSize="13sp"/>
+
         <TextView
             android:id="@+id/forgot_pass"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="30dp"
             android:text="@string/forgot_password"
             android:textColor="#00BD63"
             android:textSize="13sp"
-            android:textStyle="italic" />
+            android:textStyle="italic"
+            android:layout_marginStart="30dp"/>
+    </LinearLayout>
+
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/login_bttn"

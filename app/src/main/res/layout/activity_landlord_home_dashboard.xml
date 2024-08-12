@@ -40,7 +40,7 @@
                 android:textColor="#00BB63"/>
 
             <TextView
-                android:id="@+id/user_lastname"
+                android:id="@+id/landlord_lastname"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
@@ -103,11 +103,26 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="160dp">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/boardinglist"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:listitem="@layout/landlord_home_item"/>
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/no_post_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/no_post_added"
+                    android:visibility="gone"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/boardingList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:listitem="@layout/landlord_home_item"/>
+            </LinearLayout>
+
         </ScrollView>
 
 

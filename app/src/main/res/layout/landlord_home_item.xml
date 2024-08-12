@@ -18,7 +18,8 @@
             android:layout_width="240dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_gravity="center_vertical">
+            android:layout_gravity="center_vertical"
+            android:gravity="center">
 
             <ImageView
                 android:id="@+id/boardinghouse_pic"
@@ -29,6 +30,7 @@
                 app:strokeColor="#00BB63"/>
 
             <TextView
+                android:id="@+id/landlord_lastname"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Landlord Lastname"
@@ -37,7 +39,8 @@
                 android:textColor="#00BB63"
                 android:textSize="20sp"
                 android:layout_gravity="center"
-                android:layout_margin="10dp"/>
+                android:layout_margin="10dp"
+                android:gravity="center"/>
 
         </LinearLayout>
 
@@ -50,6 +53,7 @@
             android:layout_gravity="center">
 
             <TextView
+                android:id="@+id/status"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -61,18 +65,37 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"/>
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="₱"
-                android:textStyle="bold"
-                android:textAllCaps="true"
-                android:textColor="#00BB63"
-                android:textSize="20sp"
                 android:layout_marginTop="10dp"
                 android:layout_marginStart="5dp"
-                android:layout_marginEnd="5dp"/>
+                android:layout_marginEnd="5dp"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="₱"
+                    android:textStyle="bold"
+                    android:textAllCaps="true"
+                    android:textColor="#00BB63"
+                    android:textSize="20sp"/>
+
+                <TextView
+                    android:id="@+id/price"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="0"
+                    android:textStyle="bold"
+                    android:textAllCaps="true"
+                    android:textColor="#00BB63"
+                    android:textSize="20sp"/>
+
+            </LinearLayout>
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/viewDetails_bttn"
@@ -81,19 +104,6 @@
                 android:text="View/Edit Details"
                 android:textSize="12sp"
                 android:backgroundTint="#00BB63"
-                android:textAllCaps="false"
-                android:textColor="@color/white"
-                android:layout_marginTop="10dp"
-                android:layout_marginStart="5dp"
-                android:layout_marginEnd="5dp"/>
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/delete_bttn"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:text="Delete"
-                android:textSize="12sp"
-                android:backgroundTint="#BB0000"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
                 android:layout_marginTop="10dp"

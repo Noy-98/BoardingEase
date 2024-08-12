@@ -3,12 +3,17 @@ package com.example.boardingease
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class TenantHomeDashboard : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +50,32 @@ class TenantHomeDashboard : AppCompatActivity() {
                 return@setOnItemSelectedListener true
             }
             false
+        }
+
+        loadUserInfo()
+    }
+
+    private fun loadUserInfo() {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            val uid = currentUser.uid
+            val userReference = FirebaseDatabase.getInstance().getReference("UsersTbl/$uid")
+
+            // Retrieve doctor data from Firebase
+            userReference.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()){
+                        val users = snapshot.getValue(UsersStructureDB::class.java)
+                        if (users != null) {
+                            findViewById<TextView>(R.id.tenant_lastname).text = users.last_name
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    TODO("Not yet implemented")
+                }
+            })
         }
     }
 }
