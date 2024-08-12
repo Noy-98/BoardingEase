@@ -15,7 +15,7 @@
         android:layout_margin="10dp">
 
         <LinearLayout
-            android:layout_width="240dp"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_gravity="center_vertical"
@@ -23,7 +23,7 @@
 
             <ImageView
                 android:id="@+id/boardinghouse_pic"
-                android:layout_width="match_parent"
+                android:layout_width="200dp"
                 android:layout_height="200dp"
                 android:src="@drawable/boardingease_logo_icon"
                 app:strokeWidth="1dp"

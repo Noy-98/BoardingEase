@@ -15,11 +15,16 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
+import com.google.android.gms.tasks.Tasks
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.MutableData
+import com.google.firebase.database.Transaction
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 
@@ -97,7 +102,7 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         databaseReference = FirebaseDatabase.getInstance().reference
 
-        boardingData = intent.getParcelableExtra("boardingData") ?: BoardingDataStructureDB()
+        boardingData = intent.getSerializableExtra("boardingData") as BoardingDataStructureDB
 
         // Initialize UI elements
         lastNameEditText = findViewById(R.id.last_name)
@@ -108,8 +113,12 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
         contactNoEditText = findViewById(R.id.contact_no)
         addressEditText = findViewById(R.id.address)
 
-        val editImageButton = findViewById<AppCompatButton>(R.id.upload_bttn)
+        val deleteButton = findViewById<AppCompatButton>(R.id.delete_bttn)
+        deleteButton.setOnClickListener {
+            deleteBoardingData()
+        }
 
+        val editImageButton = findViewById<AppCompatButton>(R.id.upload_bttn)
         editImageButton.setOnClickListener {
             openImagePicker()
         }
@@ -121,6 +130,34 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
 
         populateFields()
     }
+
+    private fun deleteBoardingData() {
+        val userId = auth.currentUser?.uid ?: return
+        val currentBId = intent.getStringExtra("b_id") ?: return
+
+        // References to both paths
+        val userBoardingRef = FirebaseDatabase.getInstance().getReference("UsersTbl").child(userId).child("BoardingsTbl").child(currentBId)
+        val globalBoardingRef = FirebaseDatabase.getInstance().getReference("BoardingsTbl").child(currentBId)
+
+        // Create deletion tasks
+        val userDeleteTask = userBoardingRef.removeValue()
+        val globalDeleteTask = globalBoardingRef.removeValue()
+
+        // Run both deletion tasks in parallel and wait for them to finish
+        Tasks.whenAll(userDeleteTask, globalDeleteTask).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                // If both deletions were successful, navigate back to the dashboard
+                val intent = Intent(this, LandlordHomeDashboard::class.java)
+                startActivity(intent)
+                Toast.makeText(this, "Boarding data deleted successfully", Toast.LENGTH_SHORT).show()
+            } else {
+                // Handle the failure of either task
+                Toast.makeText(this, "Failed to delete boarding data: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                Log.e("DeleteBoardingData", "Error deleting data", task.exception)
+            }
+        }
+    }
+
 
     private fun populateFields() {
         lastNameEditText.setText(boardingData.landlord_lastname)
@@ -151,17 +188,18 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
         val address = addressEditText.text.toString().trim()
 
         if (lastName.isEmpty() || roomNo.isEmpty() || numBorders.isEmpty() ||
-            status.isEmpty() || price.isEmpty() || contactNo.isEmpty() || address.isEmpty()) {
+            status.isEmpty() || price.isEmpty() || contactNo.isEmpty() || address.isEmpty()
+        ) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Use the current b_id from the boardingData object
+        // Ensure current b_id is being used
         val currentBId = boardingData.b_id
 
         // Create a new instance of BoardingDataStructureDB with updated data
         val updatedBoardingData = BoardingDataStructureDB(
-            b_id = currentBId, // Use the same b_id
+            b_id = currentBId,
             address = address,
             contact_number = contactNo,
             landlord_lastname = lastName,
@@ -180,6 +218,8 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
 
         databaseReference.updateChildren(updates).addOnCompleteListener { task ->
             if (task.isSuccessful) {
+                val intent = Intent(this, LandlordHomeDashboard::class.java)
+                startActivity(intent)
                 Toast.makeText(this, "Data updated successfully", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, "Failed to update data: ${task.exception?.message}", Toast.LENGTH_SHORT).show()

@@ -32,6 +32,7 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var database: FirebaseDatabase
     private lateinit var currentUsersId: String
+    private lateinit var bid: String
     private lateinit var ProgressBar: ProgressBar
     private val PICK_IMAGE_REQUEST = 1
     private lateinit var selectedImageUri: Uri
@@ -88,6 +89,9 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
         val currentUser = auth.currentUser
         currentUsersId = currentUser?.uid ?: ""
 
+        val newBoardingRef = FirebaseDatabase.getInstance().reference.child("BoardingsTbl").push()
+        bid = newBoardingRef.key ?: ""
+
         val lastname = findViewById<TextInputEditText>(R.id.last_name)
         val roomNum = findViewById<TextInputEditText>(R.id.room_no)
         val numBorders = findViewById<TextInputEditText>(R.id.num_borders)
@@ -141,7 +145,9 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
                 Toast.makeText(this, "All fields are Required!", Toast.LENGTH_SHORT).show()
                 ProgressBar.visibility = View.GONE
             } else {
+
                 val boardingData =BoardingDataStructureDB(
+                    b_id = bid,
                     landlord_lastname = last_name,
                     room_number = room_Num,
                     number_of_borders = num_Borders,
@@ -187,36 +193,20 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
     private fun saveBoardingData(boardingData: BoardingDataStructureDB, imageUrl: String) {
         boardingData.unitPictureUrl = imageUrl
 
-        // Reference for BoardingsTbl under the specific user
-        val userBoardingRef = database.reference.child("UsersTbl").child(currentUsersId).child("BoardingsTbl")
-        val newUserBoardingRef = userBoardingRef.push() // Automatically generates a unique key
+        val updates = hashMapOf<String, Any>(
+            "/UsersTbl/$currentUsersId/BoardingsTbl/$bid" to boardingData,
+            "/BoardingsTbl/$bid" to boardingData
+        )
 
-        // Reference for the global BoardingsTbl
-        val globalBoardingRef = database.reference.child("BoardingsTbl")
-        val newGlobalBoardingRef = globalBoardingRef.push() // Automatically generates a unique key
-
-        // Save the data under UsersTbl/BoardingsTbl
-        newUserBoardingRef.setValue(boardingData)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    // Also save the data under the global BoardingsTbl
-                    newGlobalBoardingRef.setValue(boardingData)
-                        .addOnCompleteListener { globalTask ->
-                            if (globalTask.isSuccessful) {
-                                val intent = Intent(this, LandlordHomeDashboard::class.java)
-                                startActivity(intent)
-                                Toast.makeText(this, "Data saved successfully", Toast.LENGTH_SHORT).show()
-                                ProgressBar.visibility = View.GONE
-                            } else {
-                                Toast.makeText(this, "Failed to save data in global BoardingsTbl", Toast.LENGTH_SHORT).show()
-                                ProgressBar.visibility = View.GONE
-                            }
-                        }
-                } else {
-                    Toast.makeText(this, "Failed to save data in UsersTbl/BoardingsTbl", Toast.LENGTH_SHORT).show()
-                    ProgressBar.visibility = View.GONE
-                }
+        database.reference.updateChildren(updates).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Toast.makeText(this, "Data saved successfully", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, LandlordHomeDashboard::class.java))
+            } else {
+                Toast.makeText(this, "Failed to save data", Toast.LENGTH_SHORT).show()
             }
+            ProgressBar.visibility = View.GONE
+        }
     }
 
     private fun openImageChooser() {
