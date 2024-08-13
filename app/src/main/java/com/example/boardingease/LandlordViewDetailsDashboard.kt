@@ -36,7 +36,6 @@ import java.io.ByteArrayOutputStream
 
 class LandlordViewDetailsDashboard : AppCompatActivity() {
 
-    private lateinit var imageUri: Uri
     private lateinit var storageReference: StorageReference
     private lateinit var auth: FirebaseAuth
     private lateinit var databaseReference: DatabaseReference
@@ -146,7 +145,35 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
 
         val editProfileButton = findViewById<AppCompatButton>(R.id.edit)
         editProfileButton.setOnClickListener {
-            updateProfile()
+            val lastName = lastNameEditText.text.toString().trim()
+            val roomNo = roomNoEditText.text.toString().trim()
+            val numBorders = numBordersEditText.text.toString().trim()
+            val status = statusEditText.text.toString().trim()
+            val price = priceEditText.text.toString().trim()
+            val contactNo = contactNoEditText.text.toString().trim()
+            val address = addressEditText.text.toString().trim()
+            val rules = rulesEditText.text.toString().trim()
+
+            ProgressBar.visibility = View.VISIBLE
+
+            if (lastName.isEmpty() || roomNo.isEmpty() || numBorders.isEmpty() || status.isEmpty() || price.isEmpty() || contactNo.isEmpty() || address.isEmpty() || rules.isEmpty()) {
+                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                ProgressBar.visibility = View.GONE
+            } else {
+                // Create a new instance of BoardingDataStructureDB with updated data
+                val updatedBoardingData = BoardingDataStructureDB(
+                    b_id = currentBId,
+                    address = address,
+                    contact_number = contactNo,
+                    landlord_lastname = lastName,
+                    number_of_borders = numBorders,
+                    price = price,
+                    room_number = roomNo,
+                    status = status,
+                    rules_and_regulations = rules
+                )
+                uploadImage(updatedBoardingData)
+            }
         }
 
         populateFields()
@@ -210,49 +237,6 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
             }
     }
 
-    private fun updateProfile() {
-        val lastName = lastNameEditText.text.toString().trim()
-        val roomNo = roomNoEditText.text.toString().trim()
-        val numBorders = numBordersEditText.text.toString().trim()
-        val status = statusEditText.text.toString().trim()
-        val price = priceEditText.text.toString().trim()
-        val contactNo = contactNoEditText.text.toString().trim()
-        val address = addressEditText.text.toString().trim()
-        val rules = rulesEditText.text.toString().trim()
-
-        ProgressBar.visibility = View.VISIBLE
-
-        if (lastName.isEmpty() || roomNo.isEmpty() || numBorders.isEmpty() ||
-            status.isEmpty() || price.isEmpty() || contactNo.isEmpty() || address.isEmpty() || rules.isEmpty()
-        ) {
-            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-            ProgressBar.visibility = View.GONE
-            return
-        }
-
-        // Create a new instance of BoardingDataStructureDB with updated data
-        val updatedBoardingData = BoardingDataStructureDB(
-            b_id = currentBId,
-            address = address,
-            contact_number = contactNo,
-            landlord_lastname = lastName,
-            number_of_borders = numBorders,
-            price = price,
-            room_number = roomNo,
-            status = status,
-            rules_and_regulations = rules,
-            unitPictureUrl = boardingData.unitPictureUrl // Retain original image URL if not being edited
-        )
-
-        // Check if a new image was selected
-        val imageView = findViewById<ImageView>(R.id.boarding_pic)
-        if (imageView.drawable != null) {
-            uploadImage(updatedBoardingData)
-        } else {
-            updatedBoardingData.unitPictureUrl?.let { saveBoardingData(updatedBoardingData, it) }
-        }
-    }
-
     private fun uploadImage(updatedBoardingData: BoardingDataStructureDB) {
         val imageRef = storageReference.child("images/${System.currentTimeMillis()}.jpg")
         val imageView = findViewById<ImageView>(R.id.boarding_pic)
@@ -274,7 +258,12 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
         }.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val downloadUrl = task.result.toString()
-                saveBoardingData(updatedBoardingData.copy(unitPictureUrl = downloadUrl), downloadUrl)
+                updatedBoardingData.unitPictureUrl = downloadUrl
+                if (::selectedPermitUri.isInitialized) { // Only proceed if permit image is selected
+                    uploadPermitImage(updatedBoardingData)
+                } else {
+                    saveBoardingData(updatedBoardingData) // Save directly if no permit image is selected
+                }
             } else {
                 Toast.makeText(this, "Failed to upload image", Toast.LENGTH_SHORT).show()
                 ProgressBar.visibility = View.GONE
@@ -282,10 +271,34 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
         }
     }
 
-    private fun saveBoardingData(
-        updatedBoardingData: BoardingDataStructureDB,
-        imageUrl: String
-    ) {
+    private fun uploadPermitImage(updatedBoardingData: BoardingDataStructureDB) {
+        val permitImageRef = storageReference.child("permits/${System.currentTimeMillis()}.jpg")
+        val permitBitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedPermitUri)
+        val baos = ByteArrayOutputStream()
+        permitBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        val permitData = baos.toByteArray()
+
+        val uploadTask = permitImageRef.putBytes(permitData)
+        uploadTask.continueWithTask { task ->
+            if (!task.isSuccessful) {
+                task.exception?.let {
+                    throw it
+                }
+            }
+            permitImageRef.downloadUrl
+        }.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val permitDownloadUrl = task.result.toString()
+                updatedBoardingData.permitImageUrl = permitDownloadUrl
+                saveBoardingData(updatedBoardingData)
+            } else {
+                Toast.makeText(this, "Failed to upload permit image", Toast.LENGTH_SHORT).show()
+                ProgressBar.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun saveBoardingData(updatedBoardingData: BoardingDataStructureDB) {
         // Update the data under both UsersTbl and BoardingsTbl
         val updates = hashMapOf<String, Any>(
             "/UsersTbl/$currentUsersId/BoardingsTbl/$currentBId" to updatedBoardingData,
