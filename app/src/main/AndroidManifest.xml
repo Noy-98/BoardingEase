@@ -16,6 +16,9 @@
         android:theme="@style/Theme.BoardingEase"
         tools:targetApi="31">
         <activity
+            android:name=".LandlordNotificationConfirmationDashboard"
+            android:exported="false" />
+        <activity
             android:name=".LandlordNotificationViewDetailsDashboard"
             android:exported="false" />
         <activity

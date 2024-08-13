@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
@@ -16,7 +17,7 @@ import com.google.firebase.auth.FirebaseAuth
 class LandlordNotificationViewDetailsDashboard : AppCompatActivity() {
 
     private lateinit var reservedData: TenantsReservedDataStructureDB
-    private lateinit var currentReserveId: String
+    private lateinit var currentreserved_id: String
 
     private lateinit var LandlordlastNameText: TextView
     private lateinit var roomNumberText: TextView
@@ -63,7 +64,7 @@ class LandlordNotificationViewDetailsDashboard : AppCompatActivity() {
             false
         }
 
-        currentReserveId = intent.getStringExtra("reserved_id") ?: ""
+        currentreserved_id = intent.getStringExtra("reserved_id") ?: ""
 
         reservedData = intent.getSerializableExtra("notificationData") as TenantsReservedDataStructureDB
 
