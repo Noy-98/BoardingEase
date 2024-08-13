@@ -466,7 +466,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Upload your Valid ID"
+                        android:text="Upload your Valid ID with Barangay Clearance"
                         android:textColor="#00BB63"
                         android:textSize="20sp"
                         android:gravity="center"
@@ -482,7 +482,7 @@
                         android:layout_marginTop="10dp">
 
                         <ImageView
-                            android:id="@+id/valid_id_pic"
+                            android:id="@+id/validDocs_pic"
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:src="@drawable/boardingease_logo_icon"
@@ -490,7 +490,7 @@
                             app:strokeColor="#00BB63"/>
 
                         <androidx.appcompat.widget.AppCompatButton
-                            android:id="@+id/valid_id_bttn"
+                            android:id="@+id/validDocs_bttn"
                             android:layout_width="100dp"
                             android:layout_height="50dp"
                             android:text="UPLOAD"
@@ -529,7 +529,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Upload your Valid ID"
+                        android:text="Upload your Gcash Receipt"
                         android:textColor="#00BB63"
                         android:textSize="20sp"
                         android:gravity="center"
@@ -545,7 +545,7 @@
                         android:layout_marginTop="10dp">
 
                         <ImageView
-                            android:id="@+id/boardinghouse_pic"
+                            android:id="@+id/gcash_ss"
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:src="@drawable/gcash_icon"
@@ -553,7 +553,7 @@
                             app:strokeColor="#00BB63"/>
 
                         <androidx.appcompat.widget.AppCompatButton
-                            android:id="@+id/upload_bttn"
+                            android:id="@+id/gcash_ss_bttn"
                             android:layout_width="100dp"
                             android:layout_height="50dp"
                             android:text="UPLOAD"
@@ -620,5 +620,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/bottom_nav_menu" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminateTint="#00BD63"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

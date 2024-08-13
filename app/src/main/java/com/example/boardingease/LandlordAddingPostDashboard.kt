@@ -211,7 +211,12 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
             if (task.isSuccessful) {
                 val downloadUrl = task.result.toString()
                 boardingData.unitPictureUrl = downloadUrl
-                uploadPermitImage(boardingData)
+                if (::selectedPermitUri.isInitialized) { // Only proceed if permit image is selected
+                    uploadPermitImage(boardingData)
+                } else {
+                    saveBoardingData(boardingData) // Save directly if no permit image is selected
+                }
+
             } else {
                 Toast.makeText(this, "Failed to upload image", Toast.LENGTH_SHORT).show()
                 ProgressBar.visibility = View.GONE
