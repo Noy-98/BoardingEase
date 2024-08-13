@@ -60,6 +60,7 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
     private lateinit var gcashNumber: TextInputEditText
     private lateinit var rulesEditText: TextInputEditText
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -69,6 +70,8 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        boardingData = intent.getSerializableExtra("boardingData") as BoardingDataStructureDB
+        currentBId = intent.getStringExtra("b_id") ?: ""
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_nav)
         bottomNavigationView.selectedItemId = R.id.home
@@ -79,9 +82,10 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
                 finish()
                 return@setOnItemSelectedListener true
             } else if (item.itemId == R.id.notification) {
-                startActivity(Intent(applicationContext, LandlordNotificationDashboard::class.java))
+                val intent = Intent(this, LandlordNotificationDashboard::class.java)
+                intent.putExtra("b_id", boardingData.b_id)
+                startActivity(intent)
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                finish()
                 return@setOnItemSelectedListener true
             } else if (item.itemId == R.id.profile) {
                 startActivity(Intent(applicationContext, LandlordProfileDashboard::class.java))
@@ -104,10 +108,6 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
 
         val currentUser = auth.currentUser
         currentUsersId = currentUser?.uid ?: ""
-
-        currentBId = intent.getStringExtra("b_id") ?: ""
-
-        boardingData = intent.getSerializableExtra("boardingData") as BoardingDataStructureDB
 
         // Initialize UI elements
         lastNameEditText = findViewById(R.id.last_name)
