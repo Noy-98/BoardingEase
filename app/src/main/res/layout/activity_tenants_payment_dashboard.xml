@@ -431,7 +431,7 @@
                             android:id="@+id/concern"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:background="@drawable/text_box_effect2"
+                            android:background="#EFEBEB"
                             android:hint="Concern"
                             android:padding="0dp"
                             android:textColor="#000000"

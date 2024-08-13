@@ -282,7 +282,7 @@ class TenantsPaymentDashboard : AppCompatActivity() {
         database.reference.updateChildren(updates).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 Toast.makeText(this, "Upload successfully", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, TenantHomeDashboard::class.java))
+                startActivity(Intent(this, TenantsViewDetailsDashboard::class.java))
             } else {
                 Toast.makeText(this, "Failed to Upload", Toast.LENGTH_SHORT).show()
             }
