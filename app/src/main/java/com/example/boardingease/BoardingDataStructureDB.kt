@@ -12,6 +12,8 @@ data class BoardingDataStructureDB(
     val contact_number: String = "",
     val address: String = "",
     val rules_and_regulations: String = "",
+    val g_cash_name: String = "",
+    val g_cash_number: String = "",
     var permitImageUrl: String? = null,
     var unitPictureUrl: String? = null
 ) : Serializable

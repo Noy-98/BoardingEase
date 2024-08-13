@@ -30,4 +30,5 @@
     <string name="remember_me">Remember me</string>
     <string name="no_post_added">No post Added!</string>
     <string name="rules_amp_regulations"><![CDATA[Rules & Regulations]]></string>
+    <string name="notification">Notification</string>
 </resources>

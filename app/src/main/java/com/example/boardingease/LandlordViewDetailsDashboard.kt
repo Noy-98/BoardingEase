@@ -56,6 +56,8 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
     private lateinit var priceEditText: TextInputEditText
     private lateinit var contactNoEditText: TextInputEditText
     private lateinit var addressEditText: TextInputEditText
+    private lateinit var gcashName: TextInputEditText
+    private lateinit var gcashNumber: TextInputEditText
     private lateinit var rulesEditText: TextInputEditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,40 +73,29 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_nav)
         bottomNavigationView.selectedItemId = R.id.home
         bottomNavigationView.setOnItemSelectedListener { item: MenuItem ->
-            when (item.itemId) {
-                R.id.home -> {
-                    startActivity(Intent(applicationContext, LandlordHomeDashboard::class.java))
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                    finish()
-                    true
-                }
-                R.id.chat -> {
-                    startActivity(Intent(applicationContext, ChatLandlordDashboard::class.java))
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                    finish()
-                    true
-                }
-                R.id.gcash -> {
-                    startActivity(Intent(applicationContext, LandlordPaymentDashboard::class.java))
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                    finish()
-                    true
-                }
-                R.id.profile -> {
-                    startActivity(Intent(applicationContext, LandlordProfileDashboard::class.java))
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                    finish()
-                    true
-                }
-                R.id.logout -> {
-                    FirebaseAuth.getInstance().signOut()
-                    val intent = Intent(this, Login::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                    true
-                }
-                else -> false
+            if (item.itemId == R.id.home) {
+                startActivity(Intent(applicationContext, LandlordHomeDashboard::class.java))
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                finish()
+                return@setOnItemSelectedListener true
+            } else if (item.itemId == R.id.notification) {
+                startActivity(Intent(applicationContext, LandlordNotificationDashboard::class.java))
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                finish()
+                return@setOnItemSelectedListener true
+            } else if (item.itemId == R.id.profile) {
+                startActivity(Intent(applicationContext, LandlordProfileDashboard::class.java))
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                finish()
+                return@setOnItemSelectedListener true
+            } else if (item.itemId == R.id.logout) {
+                FirebaseAuth.getInstance().signOut()
+                val intent = Intent(this, Login::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                return@setOnItemSelectedListener true
             }
+            false
         }
         ProgressBar = findViewById(R.id.progressBar)
         auth = FirebaseAuth.getInstance()
@@ -126,6 +117,8 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
         priceEditText = findViewById(R.id.price)
         contactNoEditText = findViewById(R.id.contact_no)
         addressEditText = findViewById(R.id.address)
+        gcashName = findViewById(R.id.gcash_name)
+        gcashNumber = findViewById(R.id.gcash_number)
         rulesEditText = findViewById(R.id.rules_and_regulations)
 
         val deleteButton = findViewById<AppCompatButton>(R.id.delete_bttn)
@@ -152,11 +145,13 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
             val price = priceEditText.text.toString().trim()
             val contactNo = contactNoEditText.text.toString().trim()
             val address = addressEditText.text.toString().trim()
+            val g_cash_n = gcashName.text.toString().trim()
+            val g_cash_num = gcashNumber.text.toString().trim()
             val rules = rulesEditText.text.toString().trim()
 
             ProgressBar.visibility = View.VISIBLE
 
-            if (lastName.isEmpty() || roomNo.isEmpty() || numBorders.isEmpty() || status.isEmpty() || price.isEmpty() || contactNo.isEmpty() || address.isEmpty() || rules.isEmpty()) {
+            if (lastName.isEmpty() || roomNo.isEmpty() || numBorders.isEmpty() || status.isEmpty() || price.isEmpty() || contactNo.isEmpty() || address.isEmpty() || rules.isEmpty() || g_cash_n.isEmpty() || g_cash_num.isEmpty()) {
                 Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
                 ProgressBar.visibility = View.GONE
             } else {
@@ -170,6 +165,8 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
                     price = price,
                     room_number = roomNo,
                     status = status,
+                    g_cash_name = g_cash_n,
+                    g_cash_number = g_cash_num,
                     rules_and_regulations = rules
                 )
                 uploadImage(updatedBoardingData)
@@ -221,6 +218,8 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
         priceEditText.setText(boardingData.price)
         contactNoEditText.setText(boardingData.contact_number)
         addressEditText.setText(boardingData.address)
+        gcashName.setText(boardingData.g_cash_name)
+        gcashNumber.setText(boardingData.g_cash_number)
         rulesEditText.setText(boardingData.rules_and_regulations)
 
         boardingData.unitPictureUrl?.let {

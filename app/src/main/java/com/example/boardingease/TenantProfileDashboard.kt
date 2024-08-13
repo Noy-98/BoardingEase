@@ -43,8 +43,8 @@ class TenantProfileDashboard : AppCompatActivity() {
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 finish()
                 return@setOnItemSelectedListener true
-            } else if (item.itemId == R.id.chat) {
-                startActivity(Intent(applicationContext, ChatTenantsDashboard::class.java))
+            } else if (item.itemId == R.id.notification) {
+                startActivity(Intent(applicationContext, TenantsNotificationDashboard::class.java))
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 finish()
                 return@setOnItemSelectedListener true

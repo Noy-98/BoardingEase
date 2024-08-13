@@ -7,9 +7,9 @@
         android:icon="@drawable/baseline_home_24"
         android:title="@string/home"/>
     <item
-        android:id="@+id/chat"
-        android:icon="@drawable/baseline_chat_24"
-        android:title="@string/chat"/>
+        android:id="@+id/notification"
+        android:icon="@drawable/baseline_notifications_24"
+        android:title="@string/notification"/>
     <item
         android:id="@+id/profile"
         android:icon="@drawable/baseline_person_24"

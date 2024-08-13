@@ -3,7 +3,6 @@ package com.example.boardingease
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -11,11 +10,11 @@ import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 
-class ChatTenantsDashboard : AppCompatActivity() {
+class TenantsNotificationDashboard : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_chat_tenants_dashboard)
+        setContentView(R.layout.activity_tenants_notification_dashboard)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -23,14 +22,14 @@ class ChatTenantsDashboard : AppCompatActivity() {
         }
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_nav)
-        bottomNavigationView.selectedItemId = R.id.chat
+        bottomNavigationView.selectedItemId = R.id.notification
         bottomNavigationView.setOnItemSelectedListener { item: MenuItem ->
             if (item.itemId == R.id.home) {
                 startActivity(Intent(applicationContext, TenantHomeDashboard::class.java))
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 finish()
                 return@setOnItemSelectedListener true
-            } else if (item.itemId == R.id.chat) {
+            } else if (item.itemId == R.id.notification) {
                 return@setOnItemSelectedListener true
             } else if (item.itemId == R.id.profile) {
                 startActivity(Intent(applicationContext, TenantProfileDashboard::class.java))
@@ -45,13 +44,6 @@ class ChatTenantsDashboard : AppCompatActivity() {
                 return@setOnItemSelectedListener true
             }
             false
-        }
-
-        val chat_bttn = findViewById<ImageView>(R.id.add_chat_bttn)
-
-        chat_bttn.setOnClickListener {
-            val intent = Intent(this, SendChatTenantsDashboard::class.java)
-            startActivity(intent)
         }
     }
 }

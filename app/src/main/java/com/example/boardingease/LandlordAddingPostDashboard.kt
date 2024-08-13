@@ -59,13 +59,8 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 finish()
                 return@setOnItemSelectedListener true
-            } else if (item.itemId == R.id.chat) {
-                startActivity(Intent(applicationContext, ChatLandlordDashboard::class.java))
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                finish()
-                return@setOnItemSelectedListener true
-            } else if (item.itemId == R.id.gcash) {
-                startActivity(Intent(applicationContext, LandlordPaymentDashboard::class.java))
+            } else if (item.itemId == R.id.notification) {
+                startActivity(Intent(applicationContext, LandlordNotificationDashboard::class.java))
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 finish()
                 return@setOnItemSelectedListener true
@@ -102,6 +97,8 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
         val pricee = findViewById<TextInputEditText>(R.id.price)
         val contactNum = findViewById<TextInputEditText>(R.id.contact_no)
         val add = findViewById<TextInputEditText>(R.id.address)
+        val gcash_n = findViewById<TextInputEditText>(R.id.gcash_name)
+        val gcash_num = findViewById<TextInputEditText>(R.id.gcash_number)
         val rules = findViewById<TextInputEditText>(R.id.rules_and_regulations)
         val submitButton = findViewById<AppCompatButton>(R.id.submit_bttn)
         val Add_Picture = findViewById<AppCompatButton>(R.id.upload_bttn)
@@ -127,10 +124,12 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
             val contact_Num = contactNum.text.toString().trim()
             val adddress = add.text.toString().trim()
             val rules_reg = rules.text.toString().trim()
+            val g_cash_n = gcash_n.text.toString().trim()
+            val g_cash_num = gcash_num.text.toString().trim()
 
             ProgressBar.visibility = View.VISIBLE
 
-            if (last_name.isEmpty() || room_Num.isEmpty() || num_Borders.isEmpty() || status.isEmpty() || price_tag.isEmpty() || contact_Num.isEmpty() || adddress.isEmpty() || rules_reg.isEmpty()) {
+            if (last_name.isEmpty() || room_Num.isEmpty() || num_Borders.isEmpty() || status.isEmpty() || price_tag.isEmpty() || contact_Num.isEmpty() || adddress.isEmpty() || rules_reg.isEmpty() || g_cash_n.isEmpty() || g_cash_num.isEmpty()) {
                 if (last_name.isEmpty()) {
                     lastname.error = "Please enter your last name"
                 }
@@ -152,6 +151,12 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
                 if (adddress.isEmpty()) {
                     add.error = "Please enter your address"
                 }
+                if (g_cash_n.isEmpty()) {
+                    gcash_n.error = "Please enter your gcash name"
+                }
+                if (g_cash_num.isEmpty()) {
+                    gcash_num.error = "Please enter your gcash number"
+                }
                 if (rules_reg.isEmpty()) {
                     rules.error = "Please enter your rules and regulations"
                 }
@@ -168,6 +173,8 @@ class LandlordAddingPostDashboard : AppCompatActivity() {
                     price = price_tag,
                     contact_number = contact_Num,
                     address = adddress,
+                    g_cash_name = g_cash_n,
+                    g_cash_number = g_cash_num,
                     rules_and_regulations = rules_reg
                 )
                 uploadImage(boardingData)

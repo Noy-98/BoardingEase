@@ -47,6 +47,7 @@ class BoardingAdapter2(private val context: Context, private var boardingList: L
         holder.viewDetailsBttn.setOnClickListener {
             // Start a new activity to display patient details
             val intent = Intent(context, TenantsViewDetailsDashboard::class.java)
+            intent.putExtra("b_id", boarding.b_id)
             intent.putExtra("boardingData", boarding)
             context.startActivity(intent)
         }
