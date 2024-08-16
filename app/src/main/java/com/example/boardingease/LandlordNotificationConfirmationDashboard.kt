@@ -27,6 +27,7 @@ class LandlordNotificationConfirmationDashboard : AppCompatActivity() {
     private lateinit var cid: String
 
     private lateinit var landlordLNameEditText: TextInputEditText
+    private lateinit var tenantsLNameEditText: TextInputEditText
     private lateinit var roomNoEditText: TextInputEditText
     private lateinit var statusEditText: TextInputEditText
     private lateinit var concernEditText: TextInputEditText
@@ -44,14 +45,14 @@ class LandlordNotificationConfirmationDashboard : AppCompatActivity() {
         }
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_nav)
-        bottomNavigationView.selectedItemId = R.id.notification
+        bottomNavigationView.selectedItemId = R.id.confirmation
         bottomNavigationView.setOnItemSelectedListener { item: MenuItem ->
             if (item.itemId == R.id.home) {
                 startActivity(Intent(applicationContext, LandlordHomeDashboard::class.java))
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 finish()
                 return@setOnItemSelectedListener true
-            } else if (item.itemId == R.id.notification) {
+            } else if (item.itemId == R.id.confirmation) {
                 return@setOnItemSelectedListener true
             } else if (item.itemId == R.id.profile) {
                 startActivity(Intent(applicationContext, LandlordProfileDashboard::class.java))
@@ -82,6 +83,7 @@ class LandlordNotificationConfirmationDashboard : AppCompatActivity() {
         cid = newConfirmationRef.key ?: ""
 
         landlordLNameEditText = findViewById(R.id.landlord_last_name)
+        tenantsLNameEditText = findViewById(R.id.tenants_lastname)
         roomNoEditText = findViewById(R.id.room_num)
         statusEditText = findViewById(R.id.stat)
         concernEditText = findViewById(R.id.concern)
@@ -91,15 +93,19 @@ class LandlordNotificationConfirmationDashboard : AppCompatActivity() {
         val submitBttn = findViewById<AppCompatButton>(R.id.submit_bttn)
         submitBttn.setOnClickListener {
             val landlord_lName = landlordLNameEditText.text.toString().trim()
+            val tenants_lName = tenantsLNameEditText.text.toString().trim()
             val roomNo = roomNoEditText.text.toString().trim()
             val status = statusEditText.text.toString().trim()
             val concern = concernEditText.text.toString().trim()
 
             ProgressBar.visibility = View.VISIBLE
 
-            if (landlord_lName.isEmpty() || roomNo.isEmpty() || status.isEmpty() || concern.isEmpty()) {
+            if (landlord_lName.isEmpty() || tenants_lName.isEmpty() || roomNo.isEmpty() || status.isEmpty() || concern.isEmpty()) {
                 if (landlord_lName.isEmpty()){
                     landlordLNameEditText.error = "Please enter your last name"
+                }
+                if (tenants_lName.isEmpty()){
+                    roomNoEditText.error = "Please enter the tenants last name"
                 }
                 if (roomNo.isEmpty()){
                     roomNoEditText.error = "Please enter your room number"
@@ -116,6 +122,7 @@ class LandlordNotificationConfirmationDashboard : AppCompatActivity() {
                 val confirmationData = LandlordConfirmationDataStructureDB(
                     confirmation_id = cid,
                     landlord_last_name = landlord_lName,
+                    tenants_last_name = tenants_lName,
                     room_number = roomNo,
                     status = status,
                     concern = concern
@@ -128,13 +135,13 @@ class LandlordNotificationConfirmationDashboard : AppCompatActivity() {
     private fun saveConfirmationData(confirmationData: LandlordConfirmationDataStructureDB) {
         val updates = hashMapOf<String, Any>(
             "/UsersTbl/$currentUsersId/ConfirmationTbl/$cid" to confirmationData,
-            "/BoardingsTbl/ConfirmationTbl/$cid" to confirmationData
+            "ConfirmationTbl/$cid" to confirmationData
         )
 
         database.reference.updateChildren(updates).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 Toast.makeText(this, "Upload successfully", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, LandlordNotificationViewDetailsDashboard::class.java))
+                startActivity(Intent(this, LandlordHomeDashboard::class.java))
             } else {
                 Toast.makeText(this, "Failed to Upload", Toast.LENGTH_SHORT).show()
             }

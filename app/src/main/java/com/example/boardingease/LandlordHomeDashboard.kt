@@ -50,8 +50,8 @@ class LandlordHomeDashboard : AppCompatActivity() {
             if (item.itemId == R.id.home) {
                 // Handle Home item
                 return@setOnItemSelectedListener true
-            } else if (item.itemId == R.id.notification) {
-                startActivity(Intent(applicationContext, LandlordMobileUpdatesNotificationDashboard::class.java))
+            } else if (item.itemId == R.id.confirmation) {
+                startActivity(Intent(applicationContext, LandlordNotificationConfirmationDashboard::class.java))
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 finish()
                 return@setOnItemSelectedListener true

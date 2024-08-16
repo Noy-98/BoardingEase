@@ -121,11 +121,6 @@ class LandlordViewDetailsDashboard : AppCompatActivity() {
         gcashNumber = findViewById(R.id.gcash_number)
         rulesEditText = findViewById(R.id.rules_and_regulations)
 
-        val confrirmationButton = findViewById<AppCompatButton>(R.id.tenants_confirmation_bttn)
-        confrirmationButton.setOnClickListener {
-            val intent = Intent(this, LandlordConfirmationDataStructureDB::class.java)
-            startActivity(intent)
-        }
 
         val deleteButton = findViewById<AppCompatButton>(R.id.delete_bttn)
         deleteButton.setOnClickListener {
